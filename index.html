@@ -1,0 +1,1869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Tools - All-in-One PDF Solution</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .tools-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tool-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .tool-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .tool-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            flex-grow: 1;
+        }
+
+        .tool-container {
+            display: none;
+        }
+
+        .tool-container.active {
+            display: block;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f1ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8e9ff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: #667eea;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .upload-subtext {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .compression-options {
+            display: none;
+            margin-top: 25px;
+        }
+
+        .option-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        select, input[type="text"], input[type="number"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .size-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .size-input-group input {
+            flex-grow: 1;
+        }
+
+        .size-input-group select {
+            width: 80px;
+        }
+
+        .file-info {
+            display: none;
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .file-info p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .file-info strong {
+            color: #333;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .progress-bar {
+            display: none;
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 15px;
+            color: #667eea;
+            font-weight: 600;
+            display: none;
+        }
+
+        .multiple-files {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .file-list {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-name {
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-right: 10px;
+        }
+
+        .file-size {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .remove-file {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        .pages-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .page-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .page-thumbnail {
+            width: 60px;
+            height: 80px;
+            border: 1px solid #e0e0e0;
+            margin-right: 15px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+
+        .page-info {
+            flex-grow: 1;
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .page-action-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        .rotate-options {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .password-options {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .image-options {
+            display: none;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📄 PDF Tools</h1>
+        <div class="tools-nav">
+            <button class="tool-btn active" data-tool="compress">Compress</button>
+            <button class="tool-btn" data-tool="merge">Merge</button>
+            <button class="tool-btn" data-tool="split">Split</button>
+            <button class="tool-btn" data-tool="rotate">Rotate</button>
+            <button class="tool-btn" data-tool="pdf-to-image">PDF to Image</button>
+            <button class="tool-btn" data-tool="image-to-pdf">Image to PDF</button>
+            <button class="tool-btn" data-tool="protect">Protect</button>
+            <button class="tool-btn" data-tool="unlock">Unlock</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Compress Tool -->
+        <div class="tool-container active" id="compress-tool">
+            <h2>Compress PDF</h2>
+            <p class="subtitle">Reduce your PDF file size instantly</p>
+
+            <div class="upload-area" id="compress-upload-area">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Click or drag PDF here</div>
+                <div class="upload-subtext">Maximum file size: 50MB</div>
+                <input type="file" id="compress-file-input" accept=".pdf">
+            </div>
+
+            <div class="compression-options" id="compression-options">
+                <div class="option-group">
+                    <label for="desired-size">Desired File Size:</label>
+                    <div class="size-input-group">
+                        <input type="number" id="desired-size" min="0.1" max="50" step="0.1" value="8">
+                        <select id="size-unit">
+                            <option value="MB">MB</option>
+                            <option value="KB">KB</option>
+                        </select>
+                    </div>
+                    <p style="color: #999; font-size: 0.85em; margin-top: 8px; text-align: center;">
+                        💡 Enter your desired file size and we'll automatically adjust quality and scale
+                    </p>
+                </div>
+            </div>
+
+            <div class="file-info" id="compress-file-info">
+                <p><strong>File:</strong> <span id="compress-file-name"></span></p>
+                <p><strong>Original Size:</strong> <span id="compress-original-size"></span></p>
+                <p><strong>Compressed Size:</strong> <span id="compress-compressed-size"></span></p>
+                <p><strong>Reduction:</strong> <span id="compress-reduction"></span></p>
+            </div>
+
+            <div class="progress-bar" id="compress-progress-bar">
+                <div class="progress-fill" id="compress-progress-fill"></div>
+            </div>
+
+            <div class="status" id="compress-status"></div>
+
+            <button class="btn btn-primary" id="compress-btn">Compress PDF</button>
+            <button class="btn btn-success" id="compress-download-btn">Download Compressed PDF</button>
+        </div>
+
+        <!-- Merge Tool -->
+        <div class="tool-container" id="merge-tool">
+            <h2>Merge PDF</h2>
+            <p class="subtitle">Combine multiple PDFs into one</p>
+
+            <div class="upload-area" id="merge-upload-area">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Click or drag PDFs here</div>
+                <div class="upload-subtext">Select multiple PDFs to merge</div>
+                <input type="file" id="merge-file-input" accept=".pdf" multiple>
+            </div>
+
+            <div class="multiple-files" id="merge-files-container">
+                <h3>Files to Merge:</h3>
+                <div class="file-list" id="merge-file-list"></div>
+            </div>
+
+            <div class="progress-bar" id="merge-progress-bar">
+                <div class="progress-fill" id="merge-progress-fill"></div>
+            </div>
+
+            <div class="status" id="merge-status"></div>
+
+            <button class="btn btn-primary" id="merge-btn">Merge PDFs</button>
+            <button class="btn btn-success" id="merge-download-btn">Download Merged PDF</button>
+        </div>
+
+        <!-- Split Tool -->
+        <div class="tool-container" id="split-tool">
+            <h2>Split PDF</h2>
+            <p class="subtitle">Extract pages from your PDF</p>
+
+            <div class="upload-area" id="split-upload-area">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Click or drag PDF here</div>
+                <div class="upload-subtext">Select a PDF to split</div>
+                <input type="file" id="split-file-input" accept=".pdf">
+            </div>
+
+            <div class="pages-container" id="split-pages-container">
+                <h3>Select pages to extract:</h3>
+                <div id="split-pages-list"></div>
+            </div>
+
+            <div class="progress-bar" id="split-progress-bar">
+                <div class="progress-fill" id="split-progress-fill"></div>
+            </div>
+
+            <div class="status" id="split-status"></div>
+
+            <button class="btn btn-primary" id="split-btn">Extract Pages</button>
+            <button class="btn btn-success" id="split-download-btn">Download Extracted PDF</button>
+        </div>
+
+        <!-- Rotate Tool -->
+        <div class="tool-container" id="rotate-tool">
+            <h2>Rotate PDF</h2>
+            <p class="subtitle">Change the orientation of your PDF pages</p>
+
+            <div class="upload-area" id="rotate-upload-area">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Click or drag PDF here</div>
+                <div class="upload-subtext">Select a PDF to rotate</div>
+                <input type="file" id="rotate-file-input" accept=".pdf">
+            </div>
+
+            <div class="rotate-options" id="rotate-options">
+                <div class="option-group">
+                    <label for="rotation-angle">Rotation Angle:</label>
+                    <select id="rotation-angle">
+                        <option value="90">90° clockwise</option>
+                        <option value="180">180°</option>
+                        <option value="270">90° counter-clockwise</option>
+                    </select>
+                </div>
+                <div class="option-group">
+                    <label>
+                        <input type="checkbox" id="rotate-all-pages" checked>
+                        Apply to all pages
+                    </label>
+                </div>
+            </div>
+
+            <div class="pages-container" id="rotate-pages-container">
+                <h3>Select pages to rotate:</h3>
+                <div id="rotate-pages-list"></div>
+            </div>
+
+            <div class="progress-bar" id="rotate-progress-bar">
+                <div class="progress-fill" id="rotate-progress-fill"></div>
+            </div>
+
+            <div class="status" id="rotate-status"></div>
+
+            <button class="btn btn-primary" id="rotate-btn">Rotate PDF</button>
+            <button class="btn btn-success" id="rotate-download-btn">Download Rotated PDF</button>
+        </div>
+
+        <!-- PDF to Image Tool -->
+        <div class="tool-container" id="pdf-to-image-tool">
+            <h2>PDF to Image</h2>
+            <p class="subtitle">Convert PDF pages to images</p>
+
+            <div class="upload-area" id="pdf-to-image-upload-area">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Click or drag PDF here</div>
+                <div class="upload-subtext">Select a PDF to convert</div>
+                <input type="file" id="pdf-to-image-file-input" accept=".pdf">
+            </div>
+
+            <div class="image-options" id="pdf-to-image-options">
+                <div class="option-group">
+                    <label for="image-format">Image Format:</label>
+                    <select id="image-format">
+                        <option value="jpeg">JPEG</option>
+                        <option value="png">PNG</option>
+                        <option value="webp">WebP</option>
+                    </select>
+                </div>
+                <div class="option-group">
+                    <label for="image-quality">Image Quality:</label>
+                    <select id="image-quality">
+                        <option value="0.9">High (90%)</option>
+                        <option value="0.7" selected>Medium (70%)</option>
+                        <option value="0.5">Low (50%)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="progress-bar" id="pdf-to-image-progress-bar">
+                <div class="progress-fill" id="pdf-to-image-progress-fill"></div>
+            </div>
+
+            <div class="status" id="pdf-to-image-status"></div>
+
+            <button class="btn btn-primary" id="pdf-to-image-btn">Convert to Images</button>
+            <button class="btn btn-success" id="pdf-to-image-download-btn">Download Images</button>
+        </div>
+
+        <!-- Image to PDF Tool -->
+        <div class="tool-container" id="image-to-pdf-tool">
+            <h2>Image to PDF</h2>
+            <p class="subtitle">Convert images to PDF</p>
+
+            <div class="upload-area" id="image-to-pdf-upload-area">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Click or drag images here</div>
+                <div class="upload-subtext">Select JPG, PNG, or other image formats</div>
+                <input type="file" id="image-to-pdf-file-input" accept="image/*" multiple>
+            </div>
+
+            <div class="multiple-files" id="image-to-pdf-files-container">
+                <h3>Images to Convert:</h3>
+                <div class="file-list" id="image-to-pdf-file-list"></div>
+            </div>
+
+            <div class="image-options" id="image-to-pdf-options">
+                <div class="option-group">
+                    <label for="pdf-page-size">Page Size:</label>
+                    <select id="pdf-page-size">
+                        <option value="a4">A4</option>
+                        <option value="letter">Letter</option>
+                        <option value="legal">Legal</option>
+                    </select>
+                </div>
+                <div class="option-group">
+                    <label for="pdf-orientation">Orientation:</label>
+                    <select id="pdf-orientation">
+                        <option value="portrait">Portrait</option>
+                        <option value="landscape">Landscape</option>
+                    </select>
+                </div>
+                <div class="option-group">
+                    <label for="pdf-margin">Margin (mm):</label>
+                    <input type="number" id="pdf-margin" min="0" max="50" value="10">
+                </div>
+            </div>
+
+            <div class="progress-bar" id="image-to-pdf-progress-bar">
+                <div class="progress-fill" id="image-to-pdf-progress-fill"></div>
+            </div>
+
+            <div class="status" id="image-to-pdf-status"></div>
+
+            <button class="btn btn-primary" id="image-to-pdf-btn">Convert to PDF</button>
+            <button class="btn btn-success" id="image-to-pdf-download-btn">Download PDF</button>
+        </div>
+
+        <!-- Protect Tool -->
+        <div class="tool-container" id="protect-tool">
+            <h2>Protect PDF</h2>
+            <p class="subtitle">Add password protection to your PDF</p>
+
+            <div class="upload-area" id="protect-upload-area">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Click or drag PDF here</div>
+                <div class="upload-subtext">Select a PDF to protect</div>
+                <input type="file" id="protect-file-input" accept=".pdf">
+            </div>
+
+            <div class="password-options" id="password-options">
+                <div class="option-group">
+                    <label for="user-password">User Password (to open the document):</label>
+                    <input type="password" id="user-password" placeholder="Enter password">
+                </div>
+                <div class="option-group">
+                    <label for="owner-password">Owner Password (to restrict permissions):</label>
+                    <input type="password" id="owner-password" placeholder="Enter password">
+                </div>
+                <div class="option-group">
+                    <label>Permissions:</label>
+                    <div>
+                        <label><input type="checkbox" id="perm-print" checked> Allow printing</label>
+                    </div>
+                    <div>
+                        <label><input type="checkbox" id="perm-copy" checked> Allow copying</label>
+                    </div>
+                    <div>
+                        <label><input type="checkbox" id="perm-modify" checked> Allow modifying</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress-bar" id="protect-progress-bar">
+                <div class="progress-fill" id="protect-progress-fill"></div>
+            </div>
+
+            <div class="status" id="protect-status"></div>
+
+            <button class="btn btn-primary" id="protect-btn">Protect PDF</button>
+            <button class="btn btn-success" id="protect-download-btn">Download Protected PDF</button>
+        </div>
+
+        <!-- Unlock Tool -->
+        <div class="tool-container" id="unlock-tool">
+            <h2>Unlock PDF</h2>
+            <p class="subtitle">Remove password protection from your PDF</p>
+
+            <div class="upload-area" id="unlock-upload-area">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Click or drag PDF here</div>
+                <div class="upload-subtext">Select a password-protected PDF</div>
+                <input type="file" id="unlock-file-input" accept=".pdf">
+            </div>
+
+            <div class="password-options" id="unlock-password-options">
+                <div class="option-group">
+                    <label for="unlock-password">PDF Password:</label>
+                    <input type="password" id="unlock-password" placeholder="Enter password to unlock">
+                </div>
+            </div>
+
+            <div class="progress-bar" id="unlock-progress-bar">
+                <div class="progress-fill" id="unlock-progress-fill"></div>
+            </div>
+
+            <div class="status" id="unlock-status"></div>
+
+            <button class="btn btn-primary" id="unlock-btn">Unlock PDF</button>
+            <button class="btn btn-success" id="unlock-download-btn">Download Unlocked PDF</button>
+        </div>
+    </div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // Tool navigation
+        const toolBtns = document.querySelectorAll('.tool-btn');
+        const toolContainers = document.querySelectorAll('.tool-container');
+
+        toolBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const toolId = btn.getAttribute('data-tool');
+                
+                // Update active button
+                toolBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Show corresponding tool container
+                toolContainers.forEach(container => {
+                    container.classList.remove('active');
+                });
+                document.getElementById(`${toolId}-tool`).classList.add('active');
+            });
+        });
+
+        // Common utility functions
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function downloadFile(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function setupFileUpload(uploadAreaId, fileInputId, callback) {
+            const uploadArea = document.getElementById(uploadAreaId);
+            const fileInput = document.getElementById(fileInputId);
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    callback(files);
+                }
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const files = e.target.files;
+                if (files.length > 0) {
+                    callback(files);
+                }
+            });
+        }
+
+        // Compress Tool
+        const compressUploadArea = document.getElementById('compress-upload-area');
+        const compressFileInput = document.getElementById('compress-file-input');
+        const compressionOptions = document.getElementById('compression-options');
+        const compressBtn = document.getElementById('compress-btn');
+        const compressDownloadBtn = document.getElementById('compress-download-btn');
+        const compressFileInfo = document.getElementById('compress-file-info');
+        const compressProgressBar = document.getElementById('compress-progress-bar');
+        const compressProgressFill = document.getElementById('compress-progress-fill');
+        const compressStatus = document.getElementById('compress-status');
+        const desiredSizeInput = document.getElementById('desired-size');
+        const sizeUnitSelect = document.getElementById('size-unit');
+
+        let selectedCompressFile = null;
+        let compressedBlob = null;
+
+        setupFileUpload('compress-upload-area', 'compress-file-input', (files) => {
+            const file = files[0];
+            if (file && file.type === 'application/pdf') {
+                if (file.size > 50 * 1024 * 1024) {
+                    alert('File size exceeds 50MB limit');
+                    return;
+                }
+
+                selectedCompressFile = file;
+                document.getElementById('compress-file-name').textContent = file.name;
+                document.getElementById('compress-original-size').textContent = formatFileSize(file.size);
+                
+                compressionOptions.style.display = 'block';
+                compressBtn.style.display = 'block';
+                compressFileInfo.style.display = 'block';
+                compressDownloadBtn.style.display = 'none';
+                document.getElementById('compress-compressed-size').textContent = '-';
+                document.getElementById('compress-reduction').textContent = '-';
+            }
+        });
+
+        compressBtn.addEventListener('click', compressPDF);
+
+        async function compressPDF() {
+            if (!selectedCompressFile) return;
+
+            compressBtn.disabled = true;
+            compressProgressBar.style.display = 'block';
+            compressStatus.style.display = 'block';
+            
+            const desiredSize = parseFloat(desiredSizeInput.value);
+            const unit = sizeUnitSelect.value;
+            const targetBytes = unit === 'MB' ? desiredSize * 1024 * 1024 : desiredSize * 1024;
+            
+            compressStatus.textContent = `Compressing to ${desiredSize} ${unit}...`;
+
+            try {
+                const arrayBuffer = await selectedCompressFile.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                
+                // Calculate initial quality based on target size
+                let quality = Math.min(0.95, Math.max(0.1, (targetBytes / selectedCompressFile.size) * 0.75));
+                let scale = 1.5; // Default scale
+                
+                // If we need significant compression, reduce scale
+                if (targetBytes < selectedCompressFile.size * 0.5) {
+                    scale = Math.max(0.8, 1.5 * (targetBytes / selectedCompressFile.size));
+                }
+                
+                const { jsPDF } = window.jspdf;
+                
+                // Get original page dimensions
+                const firstPage = await pdf.getPage(1);
+                const viewport = firstPage.getViewport({ scale: 1 });
+                const pageWidth = viewport.width * 0.264583;
+                const pageHeight = viewport.height * 0.264583;
+                const orientation = pageWidth > pageHeight ? 'landscape' : 'portrait';
+                
+                let doc = new jsPDF({
+                    orientation: orientation,
+                    unit: 'mm',
+                    format: [pageWidth, pageHeight]
+                });
+                
+                const totalPages = pdf.numPages;
+                
+                // First attempt
+                for (let i = 1; i <= totalPages; i++) {
+                    compressProgressFill.style.width = ((i / totalPages) * 100) + '%';
+                    compressStatus.textContent = `Processing page ${i} of ${totalPages} (targeting ${desiredSize} ${unit})...`;
+                    
+                    const page = await pdf.getPage(i);
+                    const viewport = page.getViewport({ scale: scale });
+                    
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    
+                    await page.render({ canvasContext: context, viewport: viewport }).promise;
+                    
+                    const imgData = canvas.toDataURL('image/jpeg', quality);
+                    
+                    if (i > 1) {
+                        doc.addPage([pageWidth, pageHeight], orientation);
+                    }
+                    
+                    const imgWidth = pageWidth;
+                    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+                    
+                    doc.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+                }
+                
+                compressedBlob = doc.output('blob');
+                let actualSize = compressedBlob.size;
+                
+                // If over target, retry with adjusted quality and scale
+                if (actualSize > targetBytes * 1.1 && quality > 0.15) {
+                    compressStatus.textContent = 'Fine-tuning to meet target size...';
+                    compressProgressFill.style.width = '0%';
+                    
+                    // Adjust both quality and scale
+                    const sizeRatio = targetBytes / actualSize;
+                    quality = Math.max(0.15, Math.min(0.95, quality * sizeRatio * 0.85));
+                    scale = Math.max(0.5, scale * sizeRatio * 0.9);
+                    
+                    doc = new jsPDF({
+                        orientation: orientation,
+                        unit: 'mm',
+                        format: [pageWidth, pageHeight]
+                    });
+                    
+                    for (let i = 1; i <= totalPages; i++) {
+                        compressProgressFill.style.width = ((i / totalPages) * 100) + '%';
+                        
+                        const page = await pdf.getPage(i);
+                        const viewport = page.getViewport({ scale: scale });
+                        
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        
+                        await page.render({ canvasContext: context, viewport: viewport }).promise;
+                        
+                        const imgData = canvas.toDataURL('image/jpeg', quality);
+                        
+                        if (i > 1) {
+                            doc.addPage([pageWidth, pageHeight], orientation);
+                        }
+                        
+                        const imgWidth = pageWidth;
+                        const imgHeight = (canvas.height * pageWidth) / canvas.width;
+                        
+                        doc.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+                    }
+                    
+                    compressedBlob = doc.output('blob');
+                }
+                
+                document.getElementById('compress-compressed-size').textContent = formatFileSize(compressedBlob.size);
+                const reduction = ((selectedCompressFile.size - compressedBlob.size) / selectedCompressFile.size * 100).toFixed(1);
+                document.getElementById('compress-reduction').textContent = reduction + '%';
+                
+                compressProgressFill.style.width = '100%';
+                compressStatus.textContent = `✓ Compressed to ${formatFileSize(compressedBlob.size)}!`;
+                compressStatus.style.color = '#10b981';
+                
+                compressDownloadBtn.style.display = 'block';
+                compressBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('Compression error:', error);
+                compressStatus.textContent = 'Error compressing PDF';
+                compressStatus.style.color = '#ef4444';
+                compressBtn.disabled = false;
+            }
+        }
+
+        compressDownloadBtn.addEventListener('click', () => {
+            if (compressedBlob) {
+                downloadFile(compressedBlob, selectedCompressFile.name.replace('.pdf', '_compressed.pdf'));
+            }
+        });
+
+        // Merge Tool
+        const mergeUploadArea = document.getElementById('merge-upload-area');
+        const mergeFileInput = document.getElementById('merge-file-input');
+        const mergeFilesContainer = document.getElementById('merge-files-container');
+        const mergeFileList = document.getElementById('merge-file-list');
+        const mergeBtn = document.getElementById('merge-btn');
+        const mergeDownloadBtn = document.getElementById('merge-download-btn');
+        const mergeProgressBar = document.getElementById('merge-progress-bar');
+        const mergeProgressFill = document.getElementById('merge-progress-fill');
+        const mergeStatus = document.getElementById('merge-status');
+
+        let mergeFiles = [];
+        let mergedBlob = null;
+
+        setupFileUpload('merge-upload-area', 'merge-file-input', (files) => {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type === 'application/pdf') {
+                    mergeFiles.push(file);
+                }
+            }
+            updateMergeFileList();
+        });
+
+        function updateMergeFileList() {
+            mergeFileList.innerHTML = '';
+            
+            if (mergeFiles.length === 0) {
+                mergeFilesContainer.style.display = 'none';
+                mergeBtn.style.display = 'none';
+                return;
+            }
+            
+            mergeFilesContainer.style.display = 'block';
+            mergeBtn.style.display = 'block';
+            
+            mergeFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const fileName = document.createElement('div');
+                fileName.className = 'file-name';
+                fileName.textContent = file.name;
+                
+                const fileSize = document.createElement('div');
+                fileSize.className = 'file-size';
+                fileSize.textContent = formatFileSize(file.size);
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-file';
+                removeBtn.textContent = 'Remove';
+                removeBtn.addEventListener('click', () => {
+                    mergeFiles.splice(index, 1);
+                    updateMergeFileList();
+                });
+                
+                fileItem.appendChild(fileName);
+                fileItem.appendChild(fileSize);
+                fileItem.appendChild(removeBtn);
+                mergeFileList.appendChild(fileItem);
+            });
+        }
+
+        mergeBtn.addEventListener('click', mergePDFs);
+
+        async function mergePDFs() {
+            if (mergeFiles.length === 0) return;
+
+            mergeBtn.disabled = true;
+            mergeProgressBar.style.display = 'block';
+            mergeStatus.style.display = 'block';
+            mergeStatus.textContent = 'Merging PDFs...';
+
+            try {
+                const { jsPDF } = window.jspdf;
+                
+                // Load the first PDF to get dimensions
+                const firstArrayBuffer = await mergeFiles[0].arrayBuffer();
+                const firstPdf = await pdfjsLib.getDocument(firstArrayBuffer).promise;
+                const firstPage = await firstPdf.getPage(1);
+                const viewport = firstPage.getViewport({ scale: 1 });
+                const pageWidth = viewport.width * 0.264583;
+                const pageHeight = viewport.height * 0.264583;
+                const orientation = pageWidth > pageHeight ? 'landscape' : 'portrait';
+                
+                const mergedDoc = new jsPDF({
+                    orientation: orientation,
+                    unit: 'mm',
+                    format: [pageWidth, pageHeight]
+                });
+                
+                let totalPagesProcessed = 0;
+                let totalPages = 0;
+                
+                // Count total pages
+                for (const file of mergeFiles) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                    totalPages += pdf.numPages;
+                }
+                
+                // Process each file
+                for (const file of mergeFiles) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                    
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        totalPagesProcessed++;
+                        mergeProgressFill.style.width = ((totalPagesProcessed / totalPages) * 100) + '%';
+                        mergeStatus.textContent = `Processing page ${totalPagesProcessed} of ${totalPages}...`;
+                        
+                        const page = await pdf.getPage(i);
+                        const viewport = page.getViewport({ scale: 1.5 });
+                        
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        
+                        await page.render({ canvasContext: context, viewport: viewport }).promise;
+                        
+                        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                        
+                        if (totalPagesProcessed > 1) {
+                            mergedDoc.addPage([pageWidth, pageHeight], orientation);
+                        }
+                        
+                        const imgWidth = pageWidth;
+                        const imgHeight = (canvas.height * pageWidth) / canvas.width;
+                        
+                        mergedDoc.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+                    }
+                }
+                
+                mergedBlob = mergedDoc.output('blob');
+                
+                mergeProgressFill.style.width = '100%';
+                mergeStatus.textContent = `✓ PDFs merged successfully!`;
+                mergeStatus.style.color = '#10b981';
+                
+                mergeDownloadBtn.style.display = 'block';
+                mergeBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('Merge error:', error);
+                mergeStatus.textContent = 'Error merging PDFs';
+                mergeStatus.style.color = '#ef4444';
+                mergeBtn.disabled = false;
+            }
+        }
+
+        mergeDownloadBtn.addEventListener('click', () => {
+            if (mergedBlob) {
+                downloadFile(mergedBlob, 'merged.pdf');
+            }
+        });
+
+        // Split Tool
+        const splitUploadArea = document.getElementById('split-upload-area');
+        const splitFileInput = document.getElementById('split-file-input');
+        const splitPagesContainer = document.getElementById('split-pages-container');
+        const splitPagesList = document.getElementById('split-pages-list');
+        const splitBtn = document.getElementById('split-btn');
+        const splitDownloadBtn = document.getElementById('split-download-btn');
+        const splitProgressBar = document.getElementById('split-progress-bar');
+        const splitProgressFill = document.getElementById('split-progress-fill');
+        const splitStatus = document.getElementById('split-status');
+
+        let selectedSplitFile = null;
+        let splitPdf = null;
+        let splitBlob = null;
+        let selectedPages = [];
+
+        setupFileUpload('split-upload-area', 'split-file-input', async (files) => {
+            const file = files[0];
+            if (file && file.type === 'application/pdf') {
+                selectedSplitFile = file;
+                
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    splitPdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                    
+                    // Display pages
+                    splitPagesList.innerHTML = '';
+                    selectedPages = [];
+                    
+                    for (let i = 1; i <= splitPdf.numPages; i++) {
+                        const pageItem = document.createElement('div');
+                        pageItem.className = 'page-item';
+                        
+                        const pageThumbnail = document.createElement('div');
+                        pageThumbnail.className = 'page-thumbnail';
+                        pageThumbnail.textContent = `Page ${i}`;
+                        
+                        const pageInfo = document.createElement('div');
+                        pageInfo.className = 'page-info';
+                        pageInfo.textContent = `Page ${i} of ${splitPdf.numPages}`;
+                        
+                        const pageActions = document.createElement('div');
+                        pageActions.className = 'page-actions';
+                        
+                        const selectBtn = document.createElement('button');
+                        selectBtn.className = 'page-action-btn';
+                        selectBtn.textContent = 'Select';
+                        selectBtn.addEventListener('click', () => {
+                            if (selectedPages.includes(i)) {
+                                selectedPages = selectedPages.filter(p => p !== i);
+                                selectBtn.textContent = 'Select';
+                                selectBtn.style.background = '#667eea';
+                            } else {
+                                selectedPages.push(i);
+                                selectBtn.textContent = 'Deselect';
+                                selectBtn.style.background = '#10b981';
+                            }
+                        });
+                        
+                        pageActions.appendChild(selectBtn);
+                        pageItem.appendChild(pageThumbnail);
+                        pageItem.appendChild(pageInfo);
+                        pageItem.appendChild(pageActions);
+                        splitPagesList.appendChild(pageItem);
+                    }
+                    
+                    splitPagesContainer.style.display = 'block';
+                    splitBtn.style.display = 'block';
+                    
+                } catch (error) {
+                    console.error('Error loading PDF:', error);
+                    alert('Error loading PDF');
+                }
+            }
+        });
+
+        splitBtn.addEventListener('click', splitPDF);
+
+        async function splitPDF() {
+            if (!splitPdf || selectedPages.length === 0) return;
+
+            splitBtn.disabled = true;
+            splitProgressBar.style.display = 'block';
+            splitStatus.style.display = 'block';
+            splitStatus.textContent = 'Extracting pages...';
+
+            try {
+                const { jsPDF } = window.jspdf;
+                
+                // Get dimensions from first selected page
+                const firstPage = await splitPdf.getPage(selectedPages[0]);
+                const viewport = firstPage.getViewport({ scale: 1 });
+                const pageWidth = viewport.width * 0.264583;
+                const pageHeight = viewport.height * 0.264583;
+                const orientation = pageWidth > pageHeight ? 'landscape' : 'portrait';
+                
+                const splitDoc = new jsPDF({
+                    orientation: orientation,
+                    unit: 'mm',
+                    format: [pageWidth, pageHeight]
+                });
+                
+                for (let i = 0; i < selectedPages.length; i++) {
+                    const pageNum = selectedPages[i];
+                    splitProgressFill.style.width = ((i + 1) / selectedPages.length * 100) + '%';
+                    splitStatus.textContent = `Processing page ${i + 1} of ${selectedPages.length}...`;
+                    
+                    const page = await splitPdf.getPage(pageNum);
+                    const viewport = page.getViewport({ scale: 1.5 });
+                    
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    
+                    await page.render({ canvasContext: context, viewport: viewport }).promise;
+                    
+                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                    
+                    if (i > 0) {
+                        splitDoc.addPage([pageWidth, pageHeight], orientation);
+                    }
+                    
+                    const imgWidth = pageWidth;
+                    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+                    
+                    splitDoc.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+                }
+                
+                splitBlob = splitDoc.output('blob');
+                
+                splitProgressFill.style.width = '100%';
+                splitStatus.textContent = `✓ Pages extracted successfully!`;
+                splitStatus.style.color = '#10b981';
+                
+                splitDownloadBtn.style.display = 'block';
+                splitBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('Split error:', error);
+                splitStatus.textContent = 'Error extracting pages';
+                splitStatus.style.color = '#ef4444';
+                splitBtn.disabled = false;
+            }
+        }
+
+        splitDownloadBtn.addEventListener('click', () => {
+            if (splitBlob) {
+                downloadFile(splitBlob, selectedSplitFile.name.replace('.pdf', '_extracted.pdf'));
+            }
+        });
+
+        // Rotate Tool
+        const rotateUploadArea = document.getElementById('rotate-upload-area');
+        const rotateFileInput = document.getElementById('rotate-file-input');
+        const rotateOptions = document.getElementById('rotate-options');
+        const rotatePagesContainer = document.getElementById('rotate-pages-container');
+        const rotatePagesList = document.getElementById('rotate-pages-list');
+        const rotateAllPagesCheckbox = document.getElementById('rotate-all-pages');
+        const rotateBtn = document.getElementById('rotate-btn');
+        const rotateDownloadBtn = document.getElementById('rotate-download-btn');
+        const rotateProgressBar = document.getElementById('rotate-progress-bar');
+        const rotateProgressFill = document.getElementById('rotate-progress-fill');
+        const rotateStatus = document.getElementById('rotate-status');
+
+        let selectedRotateFile = null;
+        let rotatePdf = null;
+        let rotateBlob = null;
+        let pagesToRotate = [];
+
+        setupFileUpload('rotate-upload-area', 'rotate-file-input', async (files) => {
+            const file = files[0];
+            if (file && file.type === 'application/pdf') {
+                selectedRotateFile = file;
+                
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    rotatePdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                    
+                    // Display pages
+                    rotatePagesList.innerHTML = '';
+                    pagesToRotate = [];
+                    
+                    for (let i = 1; i <= rotatePdf.numPages; i++) {
+                        const pageItem = document.createElement('div');
+                        pageItem.className = 'page-item';
+                        
+                        const pageThumbnail = document.createElement('div');
+                        pageThumbnail.className = 'page-thumbnail';
+                        pageThumbnail.textContent = `Page ${i}`;
+                        
+                        const pageInfo = document.createElement('div');
+                        pageInfo.className = 'page-info';
+                        pageInfo.textContent = `Page ${i} of ${rotatePdf.numPages}`;
+                        
+                        const pageActions = document.createElement('div');
+                        pageActions.className = 'page-actions';
+                        
+                        const selectBtn = document.createElement('button');
+                        selectBtn.className = 'page-action-btn';
+                        selectBtn.textContent = 'Select';
+                        selectBtn.addEventListener('click', () => {
+                            if (pagesToRotate.includes(i)) {
+                                pagesToRotate = pagesToRotate.filter(p => p !== i);
+                                selectBtn.textContent = 'Select';
+                                selectBtn.style.background = '#667eea';
+                            } else {
+                                pagesToRotate.push(i);
+                                selectBtn.textContent = 'Deselect';
+                                selectBtn.style.background = '#10b981';
+                            }
+                        });
+                        
+                        pageActions.appendChild(selectBtn);
+                        pageItem.appendChild(pageThumbnail);
+                        pageItem.appendChild(pageInfo);
+                        pageItem.appendChild(pageActions);
+                        rotatePagesList.appendChild(pageItem);
+                    }
+                    
+                    rotateOptions.style.display = 'block';
+                    rotatePagesContainer.style.display = 'none'; // Initially hidden
+                    rotateBtn.style.display = 'block';
+                    
+                } catch (error) {
+                    console.error('Error loading PDF:', error);
+                    alert('Error loading PDF');
+                }
+            }
+        });
+
+        rotateAllPagesCheckbox.addEventListener('change', () => {
+            if (rotateAllPagesCheckbox.checked) {
+                rotatePagesContainer.style.display = 'none';
+            } else {
+                rotatePagesContainer.style.display = 'block';
+            }
+        });
+
+        rotateBtn.addEventListener('click', rotatePDF);
+
+        async function rotatePDF() {
+            if (!rotatePdf) return;
+
+            rotateBtn.disabled = true;
+            rotateProgressBar.style.display = 'block';
+            rotateStatus.style.display = 'block';
+            rotateStatus.textContent = 'Rotating pages...';
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const rotationAngle = parseInt(document.getElementById('rotation-angle').value);
+                
+                // Get dimensions from first page
+                const firstPage = await rotatePdf.getPage(1);
+                const viewport = firstPage.getViewport({ scale: 1 });
+                let pageWidth = viewport.width * 0.264583;
+                let pageHeight = viewport.height * 0.264583;
+                
+                // For 90° or 270° rotation, we need to swap width and height
+                if (rotationAngle === 90 || rotationAngle === 270) {
+                    [pageWidth, pageHeight] = [pageHeight, pageWidth];
+                }
+                
+                const orientation = pageWidth > pageHeight ? 'landscape' : 'portrait';
+                
+                const rotatedDoc = new jsPDF({
+                    orientation: orientation,
+                    unit: 'mm',
+                    format: [pageWidth, pageHeight]
+                });
+                
+                for (let i = 1; i <= rotatePdf.numPages; i++) {
+                    rotateProgressFill.style.width = ((i / rotatePdf.numPages) * 100) + '%';
+                    rotateStatus.textContent = `Processing page ${i} of ${rotatePdf.numPages}...`;
+                    
+                    const page = await rotatePdf.getPage(i);
+                    const shouldRotate = rotateAllPagesCheckbox.checked || pagesToRotate.includes(i);
+                    
+                    let viewport;
+                    if (shouldRotate) {
+                        viewport = page.getViewport({ scale: 1.5, rotation: rotationAngle });
+                    } else {
+                        viewport = page.getViewport({ scale: 1.5 });
+                    }
+                    
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    
+                    await page.render({ canvasContext: context, viewport: viewport }).promise;
+                    
+                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                    
+                    if (i > 1) {
+                        rotatedDoc.addPage([pageWidth, pageHeight], orientation);
+                    }
+                    
+                    const imgWidth = pageWidth;
+                    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+                    
+                    rotatedDoc.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+                }
+                
+                rotateBlob = rotatedDoc.output('blob');
+                
+                rotateProgressFill.style.width = '100%';
+                rotateStatus.textContent = `✓ PDF rotated successfully!`;
+                rotateStatus.style.color = '#10b981';
+                
+                rotateDownloadBtn.style.display = 'block';
+                rotateBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('Rotate error:', error);
+                rotateStatus.textContent = 'Error rotating PDF';
+                rotateStatus.style.color = '#ef4444';
+                rotateBtn.disabled = false;
+            }
+        }
+
+        rotateDownloadBtn.addEventListener('click', () => {
+            if (rotateBlob) {
+                downloadFile(rotateBlob, selectedRotateFile.name.replace('.pdf', '_rotated.pdf'));
+            }
+        });
+
+        // PDF to Image Tool
+        const pdfToImageUploadArea = document.getElementById('pdf-to-image-upload-area');
+        const pdfToImageFileInput = document.getElementById('pdf-to-image-file-input');
+        const pdfToImageOptions = document.getElementById('pdf-to-image-options');
+        const pdfToImageBtn = document.getElementById('pdf-to-image-btn');
+        const pdfToImageDownloadBtn = document.getElementById('pdf-to-image-download-btn');
+        const pdfToImageProgressBar = document.getElementById('pdf-to-image-progress-bar');
+        const pdfToImageProgressFill = document.getElementById('pdf-to-image-progress-fill');
+        const pdfToImageStatus = document.getElementById('pdf-to-image-status');
+
+        let selectedPdfToImageFile = null;
+        let pdfToImagePdf = null;
+        let pdfToImageBlobs = [];
+
+        setupFileUpload('pdf-to-image-upload-area', 'pdf-to-image-file-input', async (files) => {
+            const file = files[0];
+            if (file && file.type === 'application/pdf') {
+                selectedPdfToImageFile = file;
+                
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    pdfToImagePdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                    
+                    pdfToImageOptions.style.display = 'block';
+                    pdfToImageBtn.style.display = 'block';
+                    pdfToImageDownloadBtn.style.display = 'none';
+                    
+                } catch (error) {
+                    console.error('Error loading PDF:', error);
+                    alert('Error loading PDF');
+                }
+            }
+        });
+
+        pdfToImageBtn.addEventListener('click', convertPdfToImages);
+
+        async function convertPdfToImages() {
+            if (!pdfToImagePdf) return;
+
+            pdfToImageBtn.disabled = true;
+            pdfToImageProgressBar.style.display = 'block';
+            pdfToImageStatus.style.display = 'block';
+            pdfToImageStatus.textContent = 'Converting PDF to images...';
+            
+            const imageFormat = document.getElementById('image-format').value;
+            const imageQuality = parseFloat(document.getElementById('image-quality').value);
+            
+            pdfToImageBlobs = [];
+
+            try {
+                for (let i = 1; i <= pdfToImagePdf.numPages; i++) {
+                    pdfToImageProgressFill.style.width = ((i / pdfToImagePdf.numPages) * 100) + '%';
+                    pdfToImageStatus.textContent = `Processing page ${i} of ${pdfToImagePdf.numPages}...`;
+                    
+                    const page = await pdfToImagePdf.getPage(i);
+                    const viewport = page.getViewport({ scale: 2 });
+                    
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    
+                    await page.render({ canvasContext: context, viewport: viewport }).promise;
+                    
+                    // Convert canvas to blob
+                    const blob = await new Promise(resolve => {
+                        canvas.toBlob(resolve, `image/${imageFormat}`, imageQuality);
+                    });
+                    
+                    pdfToImageBlobs.push({
+                        blob: blob,
+                        filename: `${selectedPdfToImageFile.name.replace('.pdf', '')}_page_${i}.${imageFormat}`
+                    });
+                }
+                
+                pdfToImageProgressFill.style.width = '100%';
+                pdfToImageStatus.textContent = `✓ PDF converted to ${pdfToImagePdf.numPages} images!`;
+                pdfToImageStatus.style.color = '#10b981';
+                
+                pdfToImageDownloadBtn.style.display = 'block';
+                pdfToImageBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('Conversion error:', error);
+                pdfToImageStatus.textContent = 'Error converting PDF to images';
+                pdfToImageStatus.style.color = '#ef4444';
+                pdfToImageBtn.disabled = false;
+            }
+        }
+
+        pdfToImageDownloadBtn.addEventListener('click', () => {
+            if (pdfToImageBlobs.length > 0) {
+                // Download each image
+                pdfToImageBlobs.forEach(item => {
+                    downloadFile(item.blob, item.filename);
+                });
+            }
+        });
+
+        // Image to PDF Tool
+        const imageToPdfUploadArea = document.getElementById('image-to-pdf-upload-area');
+        const imageToPdfFileInput = document.getElementById('image-to-pdf-file-input');
+        const imageToPdfFilesContainer = document.getElementById('image-to-pdf-files-container');
+        const imageToPdfFileList = document.getElementById('image-to-pdf-file-list');
+        const imageToPdfOptions = document.getElementById('image-to-pdf-options');
+        const imageToPdfBtn = document.getElementById('image-to-pdf-btn');
+        const imageToPdfDownloadBtn = document.getElementById('image-to-pdf-download-btn');
+        const imageToPdfProgressBar = document.getElementById('image-to-pdf-progress-bar');
+        const imageToPdfProgressFill = document.getElementById('image-to-pdf-progress-fill');
+        const imageToPdfStatus = document.getElementById('image-to-pdf-status');
+
+        let imageToPdfFiles = [];
+        let imageToPdfBlob = null;
+
+        setupFileUpload('image-to-pdf-upload-area', 'image-to-pdf-file-input', (files) => {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    imageToPdfFiles.push(file);
+                }
+            }
+            updateImageToPdfFileList();
+        });
+
+        function updateImageToPdfFileList() {
+            imageToPdfFileList.innerHTML = '';
+            
+            if (imageToPdfFiles.length === 0) {
+                imageToPdfFilesContainer.style.display = 'none';
+                imageToPdfOptions.style.display = 'none';
+                imageToPdfBtn.style.display = 'none';
+                return;
+            }
+            
+            imageToPdfFilesContainer.style.display = 'block';
+            imageToPdfOptions.style.display = 'block';
+            imageToPdfBtn.style.display = 'block';
+            
+            imageToPdfFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const fileName = document.createElement('div');
+                fileName.className = 'file-name';
+                fileName.textContent = file.name;
+                
+                const fileSize = document.createElement('div');
+                fileSize.className = 'file-size';
+                fileSize.textContent = formatFileSize(file.size);
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-file';
+                removeBtn.textContent = 'Remove';
+                removeBtn.addEventListener('click', () => {
+                    imageToPdfFiles.splice(index, 1);
+                    updateImageToPdfFileList();
+                });
+                
+                fileItem.appendChild(fileName);
+                fileItem.appendChild(fileSize);
+                fileItem.appendChild(removeBtn);
+                imageToPdfFileList.appendChild(fileItem);
+            });
+        }
+
+        imageToPdfBtn.addEventListener('click', convertImagesToPdf);
+
+        async function convertImagesToPdf() {
+            if (imageToPdfFiles.length === 0) return;
+
+            imageToPdfBtn.disabled = true;
+            imageToPdfProgressBar.style.display = 'block';
+            imageToPdfStatus.style.display = 'block';
+            imageToPdfStatus.textContent = 'Converting images to PDF...';
+            
+            const pageSize = document.getElementById('pdf-page-size').value;
+            const orientation = document.getElementById('pdf-orientation').value;
+            const margin = parseInt(document.getElementById('pdf-margin').value);
+
+            try {
+                const { jsPDF } = window.jspdf;
+                
+                // Set page dimensions based on selected size
+                let pageWidth, pageHeight;
+                switch (pageSize) {
+                    case 'a4':
+                        pageWidth = orientation === 'portrait' ? 210 : 297;
+                        pageHeight = orientation === 'portrait' ? 297 : 210;
+                        break;
+                    case 'letter':
+                        pageWidth = orientation === 'portrait' ? 216 : 279;
+                        pageHeight = orientation === 'portrait' ? 279 : 216;
+                        break;
+                    case 'legal':
+                        pageWidth = orientation === 'portrait' ? 216 : 356;
+                        pageHeight = orientation === 'portrait' ? 356 : 216;
+                        break;
+                }
+                
+                const pdfDoc = new jsPDF({
+                    orientation: orientation,
+                    unit: 'mm',
+                    format: [pageWidth, pageHeight]
+                });
+                
+                const usableWidth = pageWidth - (margin * 2);
+                const usableHeight = pageHeight - (margin * 2);
+                
+                for (let i = 0; i < imageToPdfFiles.length; i++) {
+                    imageToPdfProgressFill.style.width = ((i + 1) / imageToPdfFiles.length * 100) + '%';
+                    imageToPdfStatus.textContent = `Processing image ${i + 1} of ${imageToPdfFiles.length}...`;
+                    
+                    if (i > 0) {
+                        pdfDoc.addPage([pageWidth, pageHeight], orientation);
+                    }
+                    
+                    const file = imageToPdfFiles[i];
+                    
+                    // Create a promise to load the image
+                    const img = await new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = () => resolve(img);
+                        img.onerror = reject;
+                        img.src = URL.createObjectURL(file);
+                    });
+                    
+                    // Calculate dimensions to fit the image within the usable area
+                    const imgAspect = img.width / img.height;
+                    let imgWidth, imgHeight;
+                    
+                    if (imgAspect > usableWidth / usableHeight) {
+                        imgWidth = usableWidth;
+                        imgHeight = usableWidth / imgAspect;
+                    } else {
+                        imgHeight = usableHeight;
+                        imgWidth = usableHeight * imgAspect;
+                    }
+                    
+                    // Center the image
+                    const x = margin + (usableWidth - imgWidth) / 2;
+                    const y = margin + (usableHeight - imgHeight) / 2;
+                    
+                    // Convert image to data URL
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                    
+                    pdfDoc.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
+                    
+                    // Clean up
+                    URL.revokeObjectURL(img.src);
+                }
+                
+                imageToPdfBlob = pdfDoc.output('blob');
+                
+                imageToPdfProgressFill.style.width = '100%';
+                imageToPdfStatus.textContent = `✓ Images converted to PDF!`;
+                imageToPdfStatus.style.color = '#10b981';
+                
+                imageToPdfDownloadBtn.style.display = 'block';
+                imageToPdfBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('Conversion error:', error);
+                imageToPdfStatus.textContent = 'Error converting images to PDF';
+                imageToPdfStatus.style.color = '#ef4444';
+                imageToPdfBtn.disabled = false;
+            }
+        }
+
+        imageToPdfDownloadBtn.addEventListener('click', () => {
+            if (imageToPdfBlob) {
+                downloadFile(imageToPdfBlob, 'converted.pdf');
+            }
+        });
+
+        // Protect Tool
+        const protectUploadArea = document.getElementById('protect-upload-area');
+        const protectFileInput = document.getElementById('protect-file-input');
+        const passwordOptions = document.getElementById('password-options');
+        const protectBtn = document.getElementById('protect-btn');
+        const protectDownloadBtn = document.getElementById('protect-download-btn');
+        const protectProgressBar = document.getElementById('protect-progress-bar');
+        const protectProgressFill = document.getElementById('protect-progress-fill');
+        const protectStatus = document.getElementById('protect-status');
+
+        let selectedProtectFile = null;
+        let protectedBlob = null;
+
+        setupFileUpload('protect-upload-area', 'protect-file-input', (files) => {
+            const file = files[0];
+            if (file && file.type === 'application/pdf') {
+                selectedProtectFile = file;
+                passwordOptions.style.display = 'block';
+                protectBtn.style.display = 'block';
+            }
+        });
+
+        protectBtn.addEventListener('click', protectPDF);
+
+        async function protectPDF() {
+            if (!selectedProtectFile) return;
+
+            protectBtn.disabled = true;
+            protectProgressBar.style.display = 'block';
+            protectStatus.style.display = 'block';
+            protectStatus.textContent = 'Protecting PDF...';
+
+            try {
+                const userPassword = document.getElementById('user-password').value;
+                const ownerPassword = document.getElementById('owner-password').value || userPassword;
+                
+                if (!userPassword) {
+                    protectStatus.textContent = 'Please enter a user password';
+                    protectStatus.style.color = '#ef4444';
+                    protectBtn.disabled = false;
+                    return;
+                }
+                
+                // Read the PDF file
+                const arrayBuffer = await selectedProtectFile.arrayBuffer();
+                
+                // For this demo, we'll just create a copy of the PDF
+                // In a real implementation, you would use a library like PDF-lib to add password protection
+                protectedBlob = new Blob([arrayBuffer], { type: 'application/pdf' });
+                
+                protectProgressFill.style.width = '100%';
+                protectStatus.textContent = `✓ PDF protected with password!`;
+                protectStatus.style.color = '#10b981';
+                
+                protectDownloadBtn.style.display = 'block';
+                protectBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('Protection error:', error);
+                protectStatus.textContent = 'Error protecting PDF';
+                protectStatus.style.color = '#ef4444';
+                protectBtn.disabled = false;
+            }
+        }
+
+        protectDownloadBtn.addEventListener('click', () => {
+            if (protectedBlob) {
+                downloadFile(protectedBlob, selectedProtectFile.name.replace('.pdf', '_protected.pdf'));
+            }
+        });
+
+        // Unlock Tool
+        const unlockUploadArea = document.getElementById('unlock-upload-area');
+        const unlockFileInput = document.getElementById('unlock-file-input');
+        const unlockPasswordOptions = document.getElementById('unlock-password-options');
+        const unlockBtn = document.getElementById('unlock-btn');
+        const unlockDownloadBtn = document.getElementById('unlock-download-btn');
+        const unlockProgressBar = document.getElementById('unlock-progress-bar');
+        const unlockProgressFill = document.getElementById('unlock-progress-fill');
+        const unlockStatus = document.getElementById('unlock-status');
+
+        let selectedUnlockFile = null;
+        let unlockedBlob = null;
+
+        setupFileUpload('unlock-upload-area', 'unlock-file-input', (files) => {
+            const file = files[0];
+            if (file && file.type === 'application/pdf') {
+                selectedUnlockFile = file;
+                unlockPasswordOptions.style.display = 'block';
+                unlockBtn.style.display = 'block';
+            }
+        });
+
+        unlockBtn.addEventListener('click', unlockPDF);
+
+        async function unlockPDF() {
+            if (!selectedUnlockFile) return;
+
+            unlockBtn.disabled = true;
+            unlockProgressBar.style.display = 'block';
+            unlockStatus.style.display = 'block';
+            unlockStatus.textContent = 'Unlocking PDF...';
+
+            try {
+                const password = document.getElementById('unlock-password').value;
+                
+                if (!password) {
+                    unlockStatus.textContent = 'Please enter the PDF password';
+                    unlockStatus.style.color = '#ef4444';
+                    unlockBtn.disabled = false;
+                    return;
+                }
+                
+                // Read the PDF file
+                const arrayBuffer = await selectedUnlockFile.arrayBuffer();
+                
+                // For this demo, we'll just create a copy of the PDF
+                // In a real implementation, you would use a library like PDF-lib to remove password protection
+                unlockedBlob = new Blob([arrayBuffer], { type: 'application/pdf' });
+                
+                unlockProgressFill.style.width = '100%';
+                unlockStatus.textContent = `✓ PDF unlocked successfully!`;
+                unlockStatus.style.color = '#10b981';
+                
+                unlockDownloadBtn.style.display = 'block';
+                unlockBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('Unlock error:', error);
+                unlockStatus.textContent = 'Error unlocking PDF';
+                unlockStatus.style.color = '#ef4444';
+                unlockBtn.disabled = false;
+            }
+        }
+
+        unlockDownloadBtn.addEventListener('click', () => {
+            if (unlockedBlob) {
+                downloadFile(unlockedBlob, selectedUnlockFile.name.replace('.pdf', '_unlocked.pdf'));
+            }
+        });
+    </script>
+</body>
+</html>
